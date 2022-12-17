@@ -1,13 +1,15 @@
 use whisper_rs::{FullParams, SamplingStrategy, WhisperContext};
 
 
-pub fn run(audio_data : Vec<i16>) {
+pub fn audio_to_text_samples(audio_data : Vec<i16>) -> Vec<String> {
+    let mut samples = vec!();
+
     let mut ctx = WhisperContext::new("models/ggml-base.bin").expect("failed to load model");
 
     let mut params = FullParams::new(SamplingStrategy::Greedy { n_past: 0 });
 
     params.set_n_threads(4);
-    params.set_language("es");
+    params.set_language("en");
     params.set_translate(false);
     params.set_print_special(false);
     params.set_print_progress(false);
@@ -64,8 +66,11 @@ pub fn run(audio_data : Vec<i16>) {
     let num_segments = ctx.full_n_segments();
     for i in 0..num_segments {
         let segment = ctx.full_get_segment_text(i).expect("failed to get segment");
-        let start_timestamp = ctx.full_get_segment_t0(i);
+        samples.push(segment);
+        /*let start_timestamp = ctx.full_get_segment_t0(i);
         let end_timestamp = ctx.full_get_segment_t1(i);
-        println!("[{} - {}]: {}", start_timestamp, end_timestamp, segment);
+        println!("[{} - {}]: {}", start_timestamp, end_timestamp, segment);*/
     }
+
+    samples
 }
